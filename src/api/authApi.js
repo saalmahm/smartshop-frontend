@@ -1,16 +1,18 @@
 import apiClient from './apiClient';
 
 export const authApi = {
-  /**
-   * Appelle POST /auth/login avec { username, password }.
-   * En cas de succès (200), response.data est une string :
-   * "Logged in as ADMIN" ou "Logged in as CLIENT".
-   */
-  async login({ username, password }) {
-    const response = await apiClient.post('/auth/login', {
-      username,
-      password,
-    });
-    return response.data; // string
+  login: async (credentials) => {
+    const response = await apiClient.post('/auth/login', credentials);
+    return response.data; // "Logged in as CLIENT"
+  },
+
+  getMyProfile: async () => {
+    const response = await apiClient.get('/me/profile');
+    return response.data; // ClientProfileDto
+  },
+
+  logout: async () => {
+    const response = await apiClient.post('/auth/logout');
+    return response.data; // "Logged out"
   },
 };
