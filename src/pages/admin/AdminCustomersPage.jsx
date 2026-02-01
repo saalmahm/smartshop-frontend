@@ -1,5 +1,5 @@
-// src/pages/admin/AdminCustomersPage.jsx
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { clientApi } from '../../api/clientApi';
 
 const PAGE_SIZE = 10;
@@ -9,6 +9,8 @@ function AdminCustomersPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   const totalPages = Math.max(
     1,
@@ -335,7 +337,10 @@ function AdminCustomersPage() {
                   {visibleClients.map((client) => (
                     <tr
                       key={client.id}
-                      className="hover:bg-gray-50 transition-colors group"
+                      className="hover:bg-gray-50 transition-colors group cursor-pointer"
+                      onClick={() =>
+                        navigate(`/admin/clients/${client.id}`)
+                      }
                     >
                       {/* Client + avatar */}
                       <td className="py-3 px-5">

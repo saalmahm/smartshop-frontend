@@ -14,7 +14,7 @@ import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
 import AppLayout from './layouts/AppLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
-
+import AdminClientDetailPage from './pages/admin/AdminClientDetailPage';
 function App() {
   const dispatch = useDispatch();
 
@@ -47,6 +47,7 @@ function App() {
           >
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
             <Route path="/admin/customers" element={<AdminCustomersPage />} />
+            <Route path="/admin/clients/:id" element={<AdminClientDetailPage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/payments" element={<AdminPaymentsPage />} />
