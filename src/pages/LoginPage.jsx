@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/authApi';
 import { setAuthenticated } from '../store/authSlice';
 import loginIllustration from '../assets/login-illustration.png';
 
 function LoginPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -24,10 +26,20 @@ function LoginPage() {
   const onSubmit = async (data) => {
     setBackendError(null);
     try {
-      const result = await authApi.login(data); // "Logged in as CLIENT" ou "Logged in as ADMIN"
-      const match = /Logged in as (\w+)/.exec(result);
-      const role = match ? match[1] : null;
+      const result = await authApi.login(data); // ex: "Logged in as CLIENT"
 
+      // Détection robuste du rôle dans la chaîne renvoyée
+      let role = null;
+      if (typeof result === 'string') {
+        const upper = result.toUpperCase();
+        if (upper.includes('ADMIN')) {
+          role = 'ADMIN';
+        } else if (upper.includes('CLIENT')) {
+          role = 'CLIENT';
+        }
+      }
+
+      // Mise à jour du state auth global
       dispatch(
         setAuthenticated({
           user: {
@@ -37,6 +49,15 @@ function LoginPage() {
         })
       );
 
+      // Redirection selon le rôle
+      if (role === 'ADMIN') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === 'CLIENT') {
+        navigate('/me/profile', { replace: true });
+      } else {
+        // rôle inconnu → sécurité
+        navigate('/login', { replace: true });
+      }
     } catch (error) {
       setBackendError(
         error?.response?.status === 401
