@@ -4,6 +4,16 @@ import { useDispatch } from 'react-redux';
 import { fetchSession } from './store/authSlice';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import ProductsPage from './pages/ProductsPage';
+import MeProfilePage from './pages/MeProfilePage';
+import MeOrdersPage from './pages/MeOrdersPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminCustomersPage from './pages/admin/AdminCustomersPage';
+import AdminProductsPage from './pages/admin/AdminProductsPage';
+import AdminOrdersPage from './pages/admin/AdminOrdersPage';
+import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
+import AppLayout from './layouts/AppLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   const dispatch = useDispatch();
@@ -15,8 +25,42 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+
+        {/* Layout global pour tout le reste */}
+        <Route element={<AppLayout />}>
+          {/* Route publique */}
+          <Route path="/products" element={<ProductsPage />} />
+
+          {/* Espace CLIENT */}
+          <Route
+            element={<ProtectedRoute requiredRole="CLIENT" />}
+          >
+            <Route path="/me/profile" element={<MeProfilePage />} />
+            <Route path="/me/orders" element={<MeOrdersPage />} />
+          </Route>
+
+          {/* Espace ADMIN */}
+          <Route
+            element={<ProtectedRoute requiredRole="ADMIN" />}
+          >
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/customers" element={<AdminCustomersPage />} />
+            <Route path="/admin/products" element={<AdminProductsPage />} />
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
+            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+          </Route>
+
+          {/* Ancien dashboard générique (optionnel) */}
+          <Route
+            element={<ProtectedRoute />}
+          >
+            <Route path="/dashboard" element={<DashboardPage />} />
+          </Route>
+        </Route>
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
