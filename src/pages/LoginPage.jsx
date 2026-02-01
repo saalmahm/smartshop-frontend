@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import { authApi } from '../api/authApi';
+import { setAuthenticated } from '../store/authSlice';
 import loginIllustration from '../assets/login-illustration.png';
 
 function LoginPage() {
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
@@ -20,7 +24,19 @@ function LoginPage() {
   const onSubmit = async (data) => {
     setBackendError(null);
     try {
-      await authApi.login(data);
+      const result = await authApi.login(data); // "Logged in as CLIENT" ou "Logged in as ADMIN"
+      const match = /Logged in as (\w+)/.exec(result);
+      const role = match ? match[1] : null;
+
+      dispatch(
+        setAuthenticated({
+          user: {
+            username: data.username,
+          },
+          role,
+        })
+      );
+
     } catch (error) {
       setBackendError(
         error?.response?.status === 401
@@ -35,7 +51,6 @@ function LoginPage() {
       {/* CARD */}
       <div className="w-full max-w-5xl rounded-[28px] shadow-[0_20px_50px_rgba(15,23,42,0.25)] overflow-hidden bg-white">
         <div className="grid grid-cols-1 md:grid-cols-2">
-
           {/* LEFT – ILLUSTRATION */}
           <div className="flex items-center justify-center px-6 py-10 bg-slate-50">
             <img
@@ -47,7 +62,6 @@ function LoginPage() {
 
           {/* RIGHT – FORM */}
           <div className="px-10 py-12 flex flex-col justify-center bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
-
             {/* HEADER */}
             <div className="mb-8">
               <h2 className="text-3xl font-bold tracking-tight">
@@ -67,23 +81,22 @@ function LoginPage() {
 
             {/* FORM */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
-              {/* EMAIL */}
+              {/* USERNAME */}
               <div>
                 <label className="text-sm font-medium">
-                  Adresse e-mail
+                  Nom d’utilisateur
                 </label>
                 <div className="mt-2 flex items-center rounded-xl px-4 py-2 bg-white/20 focus-within:bg-white transition-all duration-200 shadow-sm">
                   <input
-                    type="email"
-                    placeholder="votre@entreprise.com"
+                    type="text"
+                    placeholder="votre.identifiant"
                     {...register('username', {
-                      required: "L'adresse e-mail est requise",
+                      required: 'Nom d’utilisateur obligatoire',
                     })}
                     className="flex-1 bg-transparent text-sm text-white focus:text-slate-900 placeholder:text-white/70 focus:placeholder:text-slate-400 outline-none transition"
                   />
                   <span className="material-symbols-outlined text-white/70">
-                    alternate_email
+                    person
                   </span>
                 </div>
                 {errors.username && (
