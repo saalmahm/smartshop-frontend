@@ -38,18 +38,6 @@ function AppLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 text-sm overflow-y-auto">
-          {/* Public */}
-          <NavLink
-            to="/products"
-            className={({ isActive }) =>
-              `block px-3 py-2 rounded-md ${
-                isActive ? 'bg-slate-700' : 'hover:bg-slate-800'
-              }`
-            }
-          >
-            Produits
-          </NavLink>
-
           {isClient && (
             <>
               <div className="mt-3 text-[11px] uppercase tracking-wide text-slate-400 px-3">
@@ -80,9 +68,6 @@ function AppLayout() {
 
           {isAdmin && (
             <>
-              <div className="mt-3 text-[11px] uppercase tracking-wide text-slate-400 px-3">
-                Admin
-              </div>
               <NavLink
                 to="/admin/dashboard"
                 className={({ isActive }) =>
@@ -111,7 +96,7 @@ function AppLayout() {
                   }`
                 }
               >
-                Produits (admin)
+                Produits 
               </NavLink>
               <NavLink
                 to="/admin/orders"

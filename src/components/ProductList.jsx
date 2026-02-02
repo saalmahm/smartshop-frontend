@@ -79,14 +79,6 @@ export default function ProductList({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Produits</h1>
-        <p className="text-gray-500 mt-1 text-sm">
-          Gestion du catalogue produits
-        </p>
-      </div>
-
       {/* Cartes de stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
@@ -335,24 +327,24 @@ export default function ProductList({
                       </span>
                     </td>
 
-                    {/* ACTIONS ADMIN */}
-                    {mode === 'admin' && (
-                      <td className="py-3 px-5">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // action admin plus tard
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            edit
-                          </span>
-                          Gérer
-                        </button>
-                      </td>
-                    )}
+                {/* ACTIONS ADMIN */}
+                {mode === 'admin' && (
+                <td className="py-3 px-5">
+                    <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onProductClick(product);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+                    >
+                    <span className="material-symbols-outlined text-sm">
+                        edit
+                    </span>
+                    Gérer
+                    </button>
+                </td>
+                )}
                   </tr>
                 ))}
               </tbody>
