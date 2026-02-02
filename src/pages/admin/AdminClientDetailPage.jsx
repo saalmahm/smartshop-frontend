@@ -1,6 +1,6 @@
-// src/pages/admin/AdminClientDetailPage.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import { clientApi } from '../../api/clientApi';
 
 function formatCurrency(value) {
@@ -96,6 +96,24 @@ function AdminClientDetailPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [error, setError] = useState(null);
 
+  // édition
+  const [isEditing, setIsEditing] = useState(false);
+  const [backendError, setBackendError] = useState(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+    },
+  });
+
   useEffect(() => {
     let isMounted = true;
 
@@ -104,7 +122,16 @@ function AdminClientDetailPage() {
       setError(null);
       try {
         const data = await clientApi.getClientById(id);
-        if (isMounted) setClient(data);
+        if (isMounted) {
+          setClient(data);
+          // Pré-remplir le formulaire quand les données arrivent
+          reset({
+            name: data.name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            address: data.address || '',
+          });
+        }
       } catch (e) {
         if (isMounted) {
           setError(
@@ -122,7 +149,7 @@ function AdminClientDetailPage() {
         const data = await clientApi.getClientOrders(id);
         if (isMounted) setOrders(Array.isArray(data) ? data : []);
       } catch {
-        // on peut rester silencieux ici, l'erreur globale est gérée par fetchClient
+        // on peut rester silencieux ici
       } finally {
         if (isMounted) setLoadingOrders(false);
       }
@@ -134,7 +161,7 @@ function AdminClientDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, reset]);
 
   const totalOrders = client?.totalOrders ?? orders.length;
   const totalSpent =
@@ -151,6 +178,20 @@ function AdminClientDetailPage() {
         .slice(0, 2)
         .toUpperCase()
     : '??';
+
+  const onSubmit = async (data) => {
+    setBackendError(null);
+    try {
+      const updated = await clientApi.updateClient(id, data);
+      setClient(updated);
+      setIsEditing(false);
+    } catch (e) {
+      const message =
+        e?.response?.data?.message ||
+        "Une erreur s'est produite lors de la mise à jour.";
+      setBackendError(message);
+    }
+  };
 
   return (
     <div className="bg-gray-50 p-4">
@@ -207,8 +248,8 @@ function AdminClientDetailPage() {
             </div>
           </div>
 
-          {/* Petit encart résumé */}
-          <div className="flex flex-col items-start sm:items-end text-xs text-gray-600 gap-1">
+          {/* Petit encart résumé + bouton éditer */}
+          <div className="flex flex-col items-start sm:items-end text-xs text-gray-600 gap-2">
             <div>
               <span className="font-semibold text-gray-900">
                 #{client?.id}
@@ -227,13 +268,155 @@ function AdminClientDetailPage() {
               </span>{' '}
               dépensés
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditing((prev) => !prev);
+                setBackendError(null);
+                if (client) {
+                  reset({
+                    name: client.name || '',
+                    email: client.email || '',
+                    phone: client.phone || '',
+                    address: client.address || '',
+                  });
+                }
+              }}
+              className="mt-1 inline-flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <span className="material-symbols-outlined text-sm">
+                edit
+              </span>
+              <span>{isEditing ? 'Annuler' : 'Modifier'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Erreur globale */}
+        {/* Erreur globale (chargement profil) */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 shadow-sm">
             {error}
+          </div>
+        )}
+
+        {/* Formulaire d’édition */}
+        {isEditing && (
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <h2 className="text-sm font-semibold text-gray-900 mb-3">
+              Modifier les informations du client
+            </h2>
+
+            {backendError && (
+              <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {backendError}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm"
+            >
+              <div className="space-y-1">
+                <label className="font-medium text-gray-700">
+                  Nom complet
+                </label>
+                <input
+                  type="text"
+                  {...register('name', {
+                    required: 'Le nom du client est requis',
+                  })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-600">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  {...register('email', {
+                    required: "L'email est requis",
+                    pattern: {
+                      value:
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: 'Format e-mail invalide',
+                    },
+                  })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-600">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-medium text-gray-700">
+                  Téléphone
+                </label>
+                <input
+                  type="text"
+                  {...register('phone', {
+                    required: 'Le téléphone est requis',
+                    minLength: {
+                      value: 6,
+                      message: 'Numéro trop court',
+                    },
+                  })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                {errors.phone && (
+                  <p className="text-xs text-red-600">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1 sm:col-span-2">
+                <label className="font-medium text-gray-700">
+                  Adresse
+                </label>
+                <textarea
+                  rows={2}
+                  {...register('address', {
+                    required: "L'adresse est requise",
+                  })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
+                />
+                {errors.address && (
+                  <p className="text-xs text-red-600">
+                    {errors.address.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-2 flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setBackendError(null);
+                  }}
+                  className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs sm:text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
+                >
+                  {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
