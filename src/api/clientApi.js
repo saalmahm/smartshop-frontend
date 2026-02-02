@@ -16,4 +16,9 @@ export const clientApi = {
     const response = await apiClient.get(`/admin/clients/${id}/orders`);
     return response.data; // OrderResponseDto[]
   },
+
+  async updateClient(id, payload) {
+    const response = await apiClient.put(`/admin/clients/${id}`, payload);
+    return response.data; // ClientResponseDto
+  },
 };
