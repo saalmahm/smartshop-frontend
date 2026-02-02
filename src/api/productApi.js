@@ -25,4 +25,19 @@ export const productApi = {
     const response = await apiClient.get(`/admin/products/${id}`);
     return response.data; // ProductResponseDto
   },
+
+  async createProduct(payload) {
+    // payload: { name, description, unitPrice, stockQuantity }
+    const response = await apiClient.post('/admin/products', payload);
+    return response.data; // ProductResponseDto
+  },
+
+  async updateProduct(id, payload) {
+    const response = await apiClient.put(`/admin/products/${id}`, payload);
+    return response.data; // ProductResponseDto
+  },
+
+  async deleteProduct(id) {
+    await apiClient.delete(`/admin/products/${id}`); // 204 No Content
+  },
 };
