@@ -1,3 +1,4 @@
+// src/pages/admin/AdminOrderDetailPage.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
@@ -43,7 +44,9 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [clientName, setClientName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [actionMessage, setActionMessage] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +54,7 @@ export default function AdminOrderDetailPage() {
     async function fetchData() {
       setIsLoading(true);
       setError(null);
+      setActionMessage(null);
       try {
         const [orderData, clientsData] = await Promise.all([
           orderApi.getOrderById(id),
@@ -67,7 +71,10 @@ export default function AdminOrderDetailPage() {
       } catch (e) {
         if (!cancelled) {
           console.error('Erreur lors du chargement de la commande', e);
-          setError("Impossible de charger la commande.");
+          const msg =
+            e?.response?.data?.message ||
+            "Impossible de charger la commande.";
+          setError(msg);
         }
       } finally {
         if (!cancelled) {
@@ -90,6 +97,37 @@ export default function AdminOrderDetailPage() {
   };
 
   const items = order?.items || [];
+
+  const isPending = order?.status === 'PENDING';
+
+  async function handleStatusChange(type) {
+    if (!order) return;
+    setActionLoading(true);
+    setActionMessage(null);
+    setError(null);
+
+    try {
+      let updated;
+      if (type === 'confirm') {
+        updated = await orderApi.confirmOrder(order.id);
+      } else if (type === 'cancel') {
+        updated = await orderApi.cancelOrder(order.id);
+      } else if (type === 'reject') {
+        updated = await orderApi.rejectOrder(order.id);
+      }
+
+      setOrder(updated);
+      setActionMessage('Statut de la commande mis à jour avec succès.');
+    } catch (e) {
+      console.error('Erreur lors du changement de statut', e);
+      const msg =
+        e?.response?.data?.message ||
+        "Impossible de mettre à jour le statut de la commande.";
+      setError(msg);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   return (
     <div className="p-6 md:p-8 space-y-4">
@@ -126,16 +164,23 @@ export default function AdminOrderDetailPage() {
         )}
       </div>
 
-      {/* États */}
-      {isLoading && (
-        <div className="bg-white rounded-xl border p-6 text-center text-sm text-gray-600">
-          Chargement de la commande...
+      {/* Messages d'état/action */}
+      {actionMessage && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-700">
+          {actionMessage}
         </div>
       )}
 
-      {error && !isLoading && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-700">
           {error}
+        </div>
+      )}
+
+      {/* États de chargement/absence */}
+      {isLoading && (
+        <div className="bg-white rounded-xl border p-6 text-center text-sm text-gray-600">
+          Chargement de la commande...
         </div>
       )}
 
@@ -147,6 +192,45 @@ export default function AdminOrderDetailPage() {
 
       {order && (
         <>
+          {/* Actions de statut (ADMIN) */}
+          {isPending && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleStatusChange('confirm')}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-xs">
+                  check_circle
+                </span>
+                Confirmer
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStatusChange('cancel')}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-1 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-xs">
+                  cancel
+                </span>
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStatusChange('reject')}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-xs">
+                  block
+                </span>
+                Rejeter
+              </button>
+            </div>
+          )}
+
           {/* Résumé haut (client + montants) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
