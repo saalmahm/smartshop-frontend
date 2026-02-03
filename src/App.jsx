@@ -15,6 +15,8 @@ import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
 import AppLayout from './layouts/AppLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AdminClientDetailPage from './pages/admin/AdminClientDetailPage';
+import AdminCreateOrderPage from './pages/admin/AdminCreateOrderPage';
+import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage';
 function App() {
   const dispatch = useDispatch();
 
@@ -50,6 +52,8 @@ function App() {
             <Route path="/admin/clients/:id" element={<AdminClientDetailPage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
+            <Route path="/admin/orders/new" element={<AdminCreateOrderPage />} />
+            <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
             <Route path="/admin/payments" element={<AdminPaymentsPage />} />
           </Route>
 
