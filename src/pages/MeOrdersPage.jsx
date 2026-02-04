@@ -1,5 +1,5 @@
-// src/pages/MeOrdersPage.jsx
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { orderApi } from '../api/orderApi';
 
 function formatCurrency(value) {
@@ -34,6 +34,8 @@ function getStatusClasses(status) {
 }
 
 export default function MeOrdersPage() {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -70,12 +72,16 @@ export default function MeOrdersPage() {
     };
   }, []);
 
+  const handleRowClick = (order) => {
+    navigate(`/me/orders/${order.id}`, { state: { order } });
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Mes commandes</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Historique de vos commandes et suivi des statuts.
+          Historique de vos commandes, montants et statuts.
         </p>
       </div>
 
@@ -119,7 +125,11 @@ export default function MeOrdersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {orders.map((order) => (
-                  <tr key={order.id}>
+                  <tr
+                    key={order.id}
+                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => handleRowClick(order)}
+                  >
                     <td className="px-5 py-3 text-sm font-semibold text-gray-900">
                       #{order.id}
                     </td>
