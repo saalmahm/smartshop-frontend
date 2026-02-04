@@ -1,8 +1,8 @@
-// src/pages/admin/AdminOrderDetailPage.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { orderApi } from '../../api/orderApi';
 import { clientApi } from '../../api/clientApi';
+import { paymentApi } from '../../api/paymentApi';
 
 function formatCurrency(value) {
   if (value == null) return '-';
@@ -48,6 +48,15 @@ export default function AdminOrderDetailPage() {
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
 
+  // États formulaire paiement
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentType, setPaymentType] = useState('ESPECES');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [paymentBank, setPaymentBank] = useState('');
+  const [paymentError, setPaymentError] = useState(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -72,8 +81,7 @@ export default function AdminOrderDetailPage() {
         if (!cancelled) {
           console.error('Erreur lors du chargement de la commande', e);
           const msg =
-            e?.response?.data?.message ||
-            "Impossible de charger la commande.";
+            e?.response?.data?.message || 'Impossible de charger la commande.';
           setError(msg);
         }
       } finally {
@@ -97,8 +105,8 @@ export default function AdminOrderDetailPage() {
   };
 
   const items = order?.items || [];
-
   const isPending = order?.status === 'PENDING';
+  const remainingAmount = order?.remainingAmount || 0;
 
   async function handleStatusChange(type) {
     if (!order) return;
@@ -122,10 +130,73 @@ export default function AdminOrderDetailPage() {
       console.error('Erreur lors du changement de statut', e);
       const msg =
         e?.response?.data?.message ||
-        "Impossible de mettre à jour le statut de la commande.";
+        'Impossible de mettre à jour le statut de la commande.';
       setError(msg);
     } finally {
       setActionLoading(false);
+    }
+  }
+
+  async function handleCreatePayment(e) {
+    e.preventDefault();
+    if (!order) return;
+
+    setPaymentError(null);
+    setPaymentSuccess(null);
+
+    const amountNumber = Number(paymentAmount);
+    const remaining = order.remainingAmount || 0;
+
+    if (!paymentAmount || Number.isNaN(amountNumber)) {
+      setPaymentError('Veuillez saisir un montant valide.');
+      return;
+    }
+    if (amountNumber <= 0) {
+      setPaymentError('Le montant du paiement doit être positif.');
+      return;
+    }
+    if (remaining > 0 && amountNumber > remaining) {
+      setPaymentError(
+        'Le montant du paiement ne peut pas dépasser le montant restant dû.'
+      );
+      return;
+    }
+
+    setPaymentLoading(true);
+    try {
+      const payment = await paymentApi.createPayment({
+        orderId: order.id,
+        amount: amountNumber,
+        type: paymentType,
+        dueDate: null,
+        reference: paymentReference || null,
+        bank: paymentBank || null,
+      });
+
+      if (paymentType === 'ESPECES') {
+        setPaymentSuccess(
+          'Paiement encaissé et pris en compte dans le solde de la commande.'
+        );
+      } else {
+        setPaymentSuccess(
+          'Paiement enregistré (chèque / virement), en attente d’encaissement par la comptabilité. Le solde sera mis à jour après encaissement.'
+        );
+      }
+
+      setPaymentAmount('');
+      setPaymentReference('');
+      setPaymentBank('');
+
+      // Recharger la commande pour mettre à jour le montant restant
+      const updated = await orderApi.getOrderById(order.id);
+      setOrder(updated);
+    } catch (e) {
+      console.error('Erreur lors de la création du paiement', e);
+      const msg =
+        e?.response?.data?.message || "Impossible d'enregistrer le paiement.";
+      setPaymentError(msg);
+    } finally {
+      setPaymentLoading(false);
     }
   }
 
@@ -232,7 +303,7 @@ export default function AdminOrderDetailPage() {
           )}
 
           {/* Résumé haut (client + montants) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md-cols-3 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
               <h2 className="text-xs font-semibold text-gray-500 uppercase mb-2">
                 Client
@@ -294,6 +365,127 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Enregistrement d'un paiement */}
+          {isPending && remainingAmount > 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3 mt-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-semibold text-gray-500 uppercase">
+                    Enregistrer un paiement
+                  </h2>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Montant restant dû :{' '}
+                    <span className="font-semibold text-gray-900">
+                      {formatCurrency(remainingAmount)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {paymentError && (
+                <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-[11px] text-red-700">
+                  {paymentError}
+                </div>
+              )}
+              {paymentSuccess && (
+                <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-[11px] text-emerald-700">
+                  {paymentSuccess}
+                </div>
+              )}
+
+          <form
+            onSubmit={handleCreatePayment}
+            className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs"
+          >
+            {/* Montant */}
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-medium text-gray-700 mb-1">
+                Montant du paiement
+              </label>
+              <div className="relative rounded-lg shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Ex : 120.00"
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[11px] text-gray-400">
+                  €
+                </span>
+              </div>
+            </div>
+
+            {/* Type de paiement */}
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-medium text-gray-700 mb-1">
+                Type de paiement
+              </label>
+              <select
+                value={paymentType}
+                onChange={(e) => setPaymentType(e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="ESPECES">Espèces</option>
+                <option value="CHEQUE">Chèque</option>
+                <option value="VIREMENT">Virement</option>
+              </select>
+            </div>
+
+            {/* Référence (optionnel) */}
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-medium text-gray-700 mb-1">
+                Référence (optionnel)
+              </label>
+              <input
+                type="text"
+                value={paymentReference}
+                onChange={(e) => setPaymentReference(e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ex : CHQ-123456"
+              />
+            </div>
+
+            {/* Banque (optionnel) */}
+            <div className="md:col-span-1">
+              <label className="block text-[11px] font-medium text-gray-700 mb-1">
+                Banque (optionnel)
+              </label>
+              <input
+                type="text"
+                value={paymentBank}
+                onChange={(e) => setPaymentBank(e.target.value)}
+                className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Ex : BNP Paribas"
+              />
+            </div>
+
+            {/* Bouton */}
+            <div className="md:col-span-4 flex justify-end pt-1">
+              <button
+                type="submit"
+                disabled={paymentLoading}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  payments
+                </span>
+                {paymentLoading ? 'Enregistrement...' : 'Enregistrer le paiement'}
+              </button>
+            </div>
+          </form>
+
+            </div>
+          ) : remainingAmount <= 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mt-2 text-xs text-gray-500">
+              Cette commande est déjà entièrement payée.
+              <br />
+              Aucun nouveau paiement ne peut être enregistré.
+            </div>
+          ) : null}
 
           {/* Lignes de commande */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
