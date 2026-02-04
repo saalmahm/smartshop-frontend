@@ -17,6 +17,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import AdminClientDetailPage from './pages/admin/AdminClientDetailPage';
 import AdminCreateOrderPage from './pages/admin/AdminCreateOrderPage';
 import AdminOrderDetailPage from './pages/admin/AdminOrderDetailPage';
+import MeOrderDetailPage from './pages/MeOrderDetailPage';
 function App() {
   const dispatch = useDispatch();
 
@@ -41,6 +42,7 @@ function App() {
           >
             <Route path="/me/profile" element={<MeProfilePage />} />
             <Route path="/me/orders" element={<MeOrdersPage />} />
+            <Route path="/me/orders/:id" element={<MeOrderDetailPage />} />
           </Route>
 
           {/* Espace ADMIN */}
