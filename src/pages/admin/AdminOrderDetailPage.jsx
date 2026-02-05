@@ -109,6 +109,7 @@ export default function AdminOrderDetailPage() {
   const remainingAmount = order?.remainingAmount || 0;
   const totalTtc = order?.totalTtc || 0;
   const totalPaid = totalTtc - remainingAmount;
+  const isFullyPaid = remainingAmount === 0;
 
   // Badge de statut de paiement
   let paymentStatusLabel = 'Non payé';
@@ -282,40 +283,56 @@ export default function AdminOrderDetailPage() {
         <>
           {/* Actions de statut (ADMIN) */}
           {isPending && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => handleStatusChange('confirm')}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-xs">
-                  check_circle
-                </span>
-                Confirmer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStatusChange('cancel')}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-1 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-xs">
-                  cancel
-                </span>
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStatusChange('reject')}
-                disabled={actionLoading}
-                className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-xs">
-                  block
-                </span>
-                Rejeter
-              </button>
+            <div className="space-y-1">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange('confirm')}
+                  disabled={actionLoading || !isFullyPaid}
+                  className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60 ${
+                    isFullyPaid
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-emerald-300 cursor-not-allowed'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">
+                    check_circle
+                  </span>
+                  Confirmer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange('cancel')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1 rounded-lg bg-slate-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-xs">
+                    cancel
+                  </span>
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange('reject')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-xs">
+                    block
+                  </span>
+                  Rejeter
+                </button>
+              </div>
+
+              {!isFullyPaid && (
+                <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 inline-flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs">
+                    info
+                  </span>
+                  La commande doit être entièrement payée avant de pouvoir être
+                  confirmée.
+                </p>
+              )}
             </div>
           )}
 
