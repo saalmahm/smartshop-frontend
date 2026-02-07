@@ -102,12 +102,6 @@ function AppLayout() {
                     icon="shopping_bag"
                     label="Commandes"
                   />
-
-                  <SidebarLink
-                    to="/admin/payments"
-                    icon="payments"
-                    label="Paiements"
-                  />
                 </>
               )}
             </nav>
