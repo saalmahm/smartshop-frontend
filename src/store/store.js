@@ -1,4 +1,3 @@
-// src/store/store.js
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import clientsReducer from './clientsSlice';
@@ -14,5 +13,5 @@ export const store = configureStore({
     orders: ordersReducer,
     payments: paymentsReducer,
   },
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: import.meta.env.MODE !== 'production',
 });

@@ -14,7 +14,7 @@ function AppLayout() {
   const handleLogout = async () => {
     try {
       await dispatch(performLogout()).unwrap();
-    } catch (e) {
+    } catch {
       // on ignore l'erreur backend pour l'instant
     } finally {
       navigate('/login', { replace: true });

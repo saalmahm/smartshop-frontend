@@ -90,6 +90,7 @@ export default function AdminProductsPage() {
     }
   };
 
+  /*
   const handleDeleteProduct = async (product) => {
     const confirmed = window.confirm(
       `Êtes-vous sûr de vouloir supprimer le produit "${product.name}" ?`
@@ -109,6 +110,7 @@ export default function AdminProductsPage() {
       setIsSubmitting(false);
     }
   };
+  */
 
   return (
     <div className="p-6 md:p-8 space-y-4">

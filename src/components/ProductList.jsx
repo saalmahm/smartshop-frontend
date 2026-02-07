@@ -28,8 +28,9 @@ export default function ProductList({
   // État local pour l'input de recherche
   const [searchInput, setSearchInput] = useState(filters.name || '');
 
-  // Synchroniser l'input local avec les filtres externes
+ // Synchroniser l'input local avec les filtres externes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchInput(filters.name || '');
   }, [filters.name]);
 

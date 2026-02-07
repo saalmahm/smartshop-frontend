@@ -1,3 +1,4 @@
+/* global describe, it, cy */
 describe('Authentification', () => {
   it('devrait se connecter en tant qu\'admin et accéder au dashboard', () => {
     cy.visit('/login');

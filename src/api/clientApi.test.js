@@ -1,3 +1,4 @@
+/* global jest, test, expect */
 jest.mock('./apiClient', () => ({
   __esModule: true,
   default: {
