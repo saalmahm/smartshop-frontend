@@ -9,7 +9,7 @@ describe('Authentification', () => {
     // Vérification de la redirection
     cy.url().should('include', '/admin/dashboard');
     
-    // CORRECTION : Le titre exact dans AdminDashboardPage.jsx est "Dashboard admin"
+    //en cas de succès
     cy.contains('h1', 'Dashboard admin').should('be.visible');
   });
 
@@ -19,7 +19,7 @@ describe('Authentification', () => {
     cy.get('input[name="password"]').type('wrong_password');
     cy.get('button[type="submit"]').click();
     
-    // CORRECTION : Le message exact dans LoginPage.jsx est "Nom d'utilisateur ou mot de passe incorrect."
+    // en cas de mauvais identifiants
     cy.contains("Nom d'utilisateur ou mot de passe incorrect.").should('be.visible');
   });
 });
