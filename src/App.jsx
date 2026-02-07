@@ -11,7 +11,6 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminCustomersPage from './pages/admin/AdminCustomersPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
-import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
 import AppLayout from './layouts/AppLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AdminClientDetailPage from './pages/admin/AdminClientDetailPage';
@@ -56,7 +55,6 @@ function App() {
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/orders/new" element={<AdminCreateOrderPage />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
-            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
           </Route>
 
           {/* Ancien dashboard générique (optionnel) */}
