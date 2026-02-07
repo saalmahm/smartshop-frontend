@@ -35,7 +35,7 @@ export const performLogout = createAsyncThunk(
     try {
       await authApi.logout();
       return;
-    } catch (error) {
+    } catch {
       return rejectWithValue('LOGOUT_FAILED');
     }
   }

@@ -78,7 +78,7 @@ export default function AdminDashboardPage() {
             Dashboard admin
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Vue d&​apos;ensemble de l&​apos;activité : chiffre d&​apos;affaires,
+            Vue d&#39;ensemble de l&#39;activité : chiffre d&#39;affaires,
             commandes et clients.
           </p>
         </div>
@@ -105,38 +105,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Ligne de KPIs principaux */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KpiCard
-          icon="payments"
-          label="Chiffre d'affaires total"
-          value={formatCurrency(stats.totalRevenue)}
-          trend="+18% vs mois dernier"
-          trendPositive
-        />
-        <KpiCard
-          icon="trending_up"
-          label="CA ce mois-ci"
-          value={formatCurrency(stats.monthlyRevenue)}
-          trend="+6% vs période précédente"
-          trendPositive
-        />
-        <KpiCard
-          icon="shopping_bag"
-          label="Commandes"
-          value={stats.totalOrders}
-          trend={`${stats.pendingOrders} en attente`}
-          trendPositive={false}
-        />
-        <KpiCard
-          icon="group"
-          label="Clients actifs"
-          value={stats.customers}
-          trend={`${stats.newCustomers} nouveaux ce mois-ci`}
-          trendPositive
-        />
-      </div>
-
       {/* Ligne centrale : graph simplifié + stats secondaires */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Graph simplifié (placeholder) */}
@@ -147,9 +115,10 @@ export default function AdminDashboardPage() {
                 Revenus des 7 derniers jours
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                Évolution journalière du chiffre d&​apos;affaires
+                Évolution journalière du chiffre d&#39;affaires
               </p>
             </div>
+
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 border border-emerald-100">
               <span className="material-symbols-outlined text-xs">
                 trending_up
@@ -162,8 +131,7 @@ export default function AdminDashboardPage() {
           <div className="mt-4 h-32 flex items-end gap-1.5">
             {revenueSparkline.map((value, idx) => (
               <div
-                // eslint-disable-next-line react/no-array-index-key
-                key={idx}
+                key={`spark-${idx}`}
                 className="flex-1 rounded-full bg-violet-100 relative overflow-hidden"
                 style={{ height: `${value}%` }}
               >

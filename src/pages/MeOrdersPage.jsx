@@ -99,7 +99,7 @@ export default function MeOrdersPage() {
 
       {!isLoading && !error && orders.length === 0 && (
         <div className="bg-white rounded-xl border p-6 text-center text-sm text-gray-500">
-          Vous n&​apos;avez pas encore de commande.
+          Vous n'avez pas encore de commande.
         </div>
       )}
 

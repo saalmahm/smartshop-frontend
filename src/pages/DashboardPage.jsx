@@ -11,7 +11,8 @@ function DashboardPage() {
   const handleLogout = async () => {
     try {
       await dispatch(performLogout()).unwrap();
-    } catch (e) {
+    } catch {
+      // ignore error
     } finally {
       navigate('/login', { replace: true });
     }

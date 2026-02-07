@@ -132,7 +132,7 @@ function AdminClientDetailPage() {
             address: data.address || '',
           });
         }
-      } catch (e) {
+      } catch {
         if (isMounted) {
           setError(
             "Impossible de charger le profil client. Vérifiez que l'identifiant est valide.",

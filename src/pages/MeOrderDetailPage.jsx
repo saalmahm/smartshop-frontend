@@ -43,9 +43,7 @@ export default function MeOrderDetailPage() {
       try {
         const all = await orderApi.getMyOrders();
         if (!cancelled) {
-          const found = (all || []).find(
-            (o) => String(o.id) === String(id)
-          );
+          const found = (all || []).find((o) => String(o.id) === String(id));
           if (!found) {
             setError('Commande introuvable.');
           } else {
@@ -54,10 +52,7 @@ export default function MeOrderDetailPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          console.error(
-            'Erreur lors du chargement de la commande client',
-            e
-          );
+          console.error('Erreur lors du chargement de la commande client', e);
           const msg =
             e?.response?.data?.message ||
             'Impossible de charger cette commande.';
@@ -142,7 +137,7 @@ export default function MeOrderDetailPage() {
               <p className="text-sm font-semibold text-gray-900">
                 Commande #{order.id}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-0.5">
                 Passée le {formatDateTime(order.createdAt)}
               </p>
               {order.promoCode && (
@@ -206,7 +201,7 @@ export default function MeOrderDetailPage() {
             </h2>
             {!hasDiscount ? (
               <p className="text-xs text-gray-500">
-                Aucune remise n&​apos;a été appliquée sur cette commande.
+                Aucune remise n'a été appliquée sur cette commande.
               </p>
             ) : (
               <div className="space-y-2 text-sm text-gray-800">
@@ -228,10 +223,10 @@ export default function MeOrderDetailPage() {
                 )}
 
                 <p className="text-xs text-gray-600">
-                  Le montant de remise indiqué correspond à l&​apos;ensemble
+                  Le montant de remise indiqué correspond à l'ensemble
                   des avantages appliqués sur cette commande (fidélité et/ou
                   promotion). Le détail exact entre fidélité et promotion
-                  n&​apos;est pas différencié par le système, mais la somme
+                  n'est pas différencié par le système, mais la somme
                   totale est {formatCurrency(order.discountAmount)}.
                 </p>
               </div>
